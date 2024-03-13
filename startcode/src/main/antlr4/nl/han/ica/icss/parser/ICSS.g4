@@ -45,5 +45,35 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: EOF;
+stylesheet: styleblock+ EOF;
+styleblock: stylerule | varAssignment;
 
+stylerule: selector OPEN_BRACE ruletype* CLOSE_BRACE;
+ruletype: ifStatement | declaratie | varAssignment;
+selector: (ID_IDENT | CLASS_IDENT | LOWER_IDENT) ;
+
+declaratie: property COLON value SEMICOLON;
+//alleen mogelijke properties: color, background-color, width, height
+property: LOWER_IDENT;
+//color en background-color MOETEN hex zijn
+value: COLOR | PIXELSIZE | PERCENTAGE | var;
+
+//TODO fix value, variabele en expression relatie
+//de value van een property mag ook een variabele zijn
+//alleen kan een variabale een waarde krijgen (TRUE) die niet valide is binnen een property
+//expressions mag ook een var zijn die alleen een bool type bevat.
+
+//verschil maken tussen 3 variabele typen 1: propery mogelijk 2: scalar erbij 3: bools
+// valueVar: COLOR | PIXELSIZE | PERCENTAGE
+// normalVar: COLOR | PIXELSIZE | PERCENTAGE | SCALAR
+// boolVar: TRUE | FALSE
+
+varAssignment: var ASSIGNMENT_OPERATOR varValue SEMICOLON;
+var: CAPITAL_IDENT;
+varValue: COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE;
+
+ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (elseStatement)?;
+elseStatement: ELSE OPEN_BRACE body CLOSE_BRACE;
+//expressions mag ook een var zijn die een bool bevat.
+expression: var | TRUE | FALSE;
+body: ruletype*;
