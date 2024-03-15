@@ -2,6 +2,9 @@ grammar ICSS;
 
 //--- LEXER: ---
 
+COLOR_PROPERTYS: 'color' | 'background-color';
+WIDTH_HEIGHT_PROPERTYS: 'width' | 'height';
+
 // IF support:
 IF: 'if';
 ELSE: 'else';
@@ -42,38 +45,41 @@ MUL: '*';
 ASSIGNMENT_OPERATOR: ':=';
 
 
-
-
 //--- PARSER: ---
 stylesheet: styleblock+ EOF;
 styleblock: stylerule | varAssignment;
 
 stylerule: selector OPEN_BRACE ruletype* CLOSE_BRACE;
 ruletype: ifStatement | declaratie | varAssignment;
-selector: (ID_IDENT | CLASS_IDENT | LOWER_IDENT) ;
+selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
-declaratie: property COLON value SEMICOLON;
-//alleen mogelijke properties: color, background-color, width, height
-property: LOWER_IDENT;
-//color en background-color MOETEN hex zijn
-value: COLOR | PIXELSIZE | PERCENTAGE | var;
+//declaratie: property COLON propValue SEMICOLON;
+//property: LOWER_IDENT;
+//propValue: var | COLOR | PIXELSIZE | PERCENTAGE | calc;
 
-//TODO fix value, variabele en expression relatie
-//de value van een property mag ook een variabele zijn
-//alleen kan een variabale een waarde krijgen (TRUE) die niet valide is binnen een property
-//expressions mag ook een var zijn die alleen een bool type bevat.
-
-//verschil maken tussen 3 variabele typen 1: propery mogelijk 2: scalar erbij 3: bools
-// valueVar: COLOR | PIXELSIZE | PERCENTAGE
-// normalVar: COLOR | PIXELSIZE | PERCENTAGE | SCALAR
-// boolVar: TRUE | FALSE
+declaratie: COLOR_PROPERTYS COLON propColorValue SEMICOLON
+    | WIDTH_HEIGHT_PROPERTYS COLON propValue SEMICOLON;
+propColorValue: var | COLOR;
+propValue: var | PIXELSIZE | PERCENTAGE | calc;
 
 varAssignment: var ASSIGNMENT_OPERATOR varValue SEMICOLON;
 var: CAPITAL_IDENT;
-varValue: COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE;
+varValue: var | COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE | calc;
 
 ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (elseStatement)?;
 elseStatement: ELSE OPEN_BRACE body CLOSE_BRACE;
-//expressions mag ook een var zijn die een bool bevat.
 expression: var | TRUE | FALSE;
-body: ruletype*;
+body: ruletype*; //aanname dat een body leeg mag zijn
+
+calc: calcPixel | calcPercent;
+calcPixel: calcPixel MUL SCALAR
+    | SCALAR MUL calcPixel
+    | calcPixel (PLUS|MIN) calcPixel
+    | PIXELSIZE
+    | var;
+
+calcPercent: calcPercent MUL SCALAR
+    | SCALAR MUL calcPercent
+    | calcPercent (PLUS|MIN) calcPercent
+    | PERCENTAGE
+    | var;
