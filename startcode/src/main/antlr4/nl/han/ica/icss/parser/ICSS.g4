@@ -46,40 +46,39 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: styleblock+ EOF;
-styleblock: stylerule | varAssignment;
+//stylesheet: styleblock+ EOF;
+//styleblock: stylerule | varAssignment;
 
-stylerule: selector OPEN_BRACE ruletype* CLOSE_BRACE;
-ruletype: ifStatement | declaratie | varAssignment;
+stylesheet: stylerule* EOF;
+stylerule: selector OPEN_BRACE body+ CLOSE_BRACE | varAssignment;
+body: ifStatement | declaration | varAssignment; //aanname dat een body altijd gevuld moet zijn (+)
 selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
 //declaratie: property COLON propValue SEMICOLON;
 //property: LOWER_IDENT;
 //propValue: var | COLOR | PIXELSIZE | PERCENTAGE | calc;
 
-declaratie: COLOR_PROPERTYS COLON propColorValue SEMICOLON
+declaration: COLOR_PROPERTYS COLON propColorValue SEMICOLON
     | WIDTH_HEIGHT_PROPERTYS COLON propValue SEMICOLON;
-propColorValue: var | COLOR;
-propValue: var | PIXELSIZE | PERCENTAGE | calc;
+propColorValue: CAPITAL_IDENT | COLOR;
+propValue: CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | calc;
 
-varAssignment: var ASSIGNMENT_OPERATOR varValue SEMICOLON;
-var: CAPITAL_IDENT;
-varValue: var | COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE | calc;
+varAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR varValue SEMICOLON;
+varValue: CAPITAL_IDENT | COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE | calc;
 
-ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (elseStatement)?;
-elseStatement: ELSE OPEN_BRACE body CLOSE_BRACE;
-expression: var | TRUE | FALSE;
-body: ruletype*; //aanname dat een body leeg mag zijn
+ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body+ CLOSE_BRACE (elseStatement)?;
+elseStatement: ELSE OPEN_BRACE body+ CLOSE_BRACE;
+expression: CAPITAL_IDENT | TRUE | FALSE;
 
 calc: calcPixel | calcPercent;
 calcPixel: calcPixel MUL SCALAR
     | SCALAR MUL calcPixel
     | calcPixel (PLUS|MIN) calcPixel
     | PIXELSIZE
-    | var;
+    | CAPITAL_IDENT;
 
 calcPercent: calcPercent MUL SCALAR
     | SCALAR MUL calcPercent
     | calcPercent (PLUS|MIN) calcPercent
     | PERCENTAGE
-    | var;
+    | CAPITAL_IDENT;
