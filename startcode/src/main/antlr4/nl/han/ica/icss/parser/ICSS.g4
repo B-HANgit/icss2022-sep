@@ -46,11 +46,9 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-//stylesheet: styleblock+ EOF;
-//styleblock: stylerule | varAssignment;
 
-stylesheet: stylerule* EOF;
-stylerule: selector OPEN_BRACE body+ CLOSE_BRACE | varAssignment;
+stylesheet: (stylerule|varAssignment)* EOF;
+stylerule: selector OPEN_BRACE body+ CLOSE_BRACE;
 body: ifStatement | declaration | varAssignment; //aanname dat een body altijd gevuld moet zijn (+)
 selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 

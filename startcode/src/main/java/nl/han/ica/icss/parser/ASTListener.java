@@ -93,7 +93,7 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterDeclaration(ICSSParser.DeclarationContext ctx) {
-        Declaration declaration = new Declaration();
+        Declaration declaration = new Declaration(ctx.getText());
         currentContainer.peek().addChild(declaration);
         currentContainer.push(declaration);
     }
@@ -105,9 +105,9 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterPropColorValue(ICSSParser.PropColorValueContext ctx) {
-        PropertyName propertyName = new PropertyName(ctx.getText());
-        currentContainer.peek().addChild(propertyName);
-        currentContainer.push(propertyName);
+        ColorLiteral colorLiteral = new ColorLiteral(ctx.getText());
+        currentContainer.peek().addChild(colorLiteral);
+        currentContainer.push(colorLiteral);
     }
 
     @Override
@@ -117,9 +117,21 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterPropValue(ICSSParser.PropValueContext ctx) {
-        PropertyName propertyName = new PropertyName(ctx.getText());
-        currentContainer.peek().addChild(propertyName);
-        currentContainer.push(propertyName);
+        if(ctx.PIXELSIZE() != null) {
+            Literal literal = new PixelLiteral(ctx.getText());
+            currentContainer.peek().addChild(literal);
+            currentContainer.push(literal);
+        } else if(ctx.PERCENTAGE() != null) {
+            Literal literal = new PercentageLiteral(ctx.getText());
+            currentContainer.peek().addChild(literal);
+            currentContainer.push(literal);
+        } else if(ctx.CAPITAL_IDENT() != null) {
+            VariableReference vr = new VariableReference(ctx.getText());
+            currentContainer.peek().addChild(vr);
+            currentContainer.push(vr);
+        } else if(ctx.calc() != null) {
+            //TODO: implement calc
+        }
     }
 
     @Override
@@ -130,6 +142,28 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void enterVarAssignment(ICSSParser.VarAssignmentContext ctx) {
         VariableAssignment variableAssignment = new VariableAssignment();
+        variableAssignment.name = new VariableReference(ctx.CAPITAL_IDENT().getText());
+        //TODO: implement variableAssignment.expression
+        if(ctx.varValue() != null) {
+            if(ctx.varValue().PIXELSIZE() != null) {
+                variableAssignment.expression = new PixelLiteral(ctx.varValue().PIXELSIZE().getText());
+            } else if(ctx.varValue().PERCENTAGE() != null) {
+                variableAssignment.expression = new PercentageLiteral(ctx.varValue().PERCENTAGE().getText());
+            } else if(ctx.varValue().COLOR() != null) {
+                variableAssignment.expression = new ColorLiteral(ctx.varValue().COLOR().getText());
+            } else if(ctx.varValue().CAPITAL_IDENT() != null) {
+                variableAssignment.expression = new VariableReference(ctx.varValue().CAPITAL_IDENT().getText());
+            } else if(ctx.varValue().TRUE() != null){
+                variableAssignment.expression = new BoolLiteral(ctx.varValue().TRUE().getText());
+            } else if(ctx.varValue().FALSE() != null){
+                variableAssignment.expression = new BoolLiteral(ctx.varValue().FALSE().getText());
+            } else if (ctx.varValue().SCALAR() != null) {
+                variableAssignment.expression = new ScalarLiteral(ctx.varValue().SCALAR().getText());
+            } else if(ctx.varValue().calc() != null) {
+//                TODO implement calc
+            }
+        }
+
         currentContainer.peek().addChild(variableAssignment);
         currentContainer.push(variableAssignment);
     }
