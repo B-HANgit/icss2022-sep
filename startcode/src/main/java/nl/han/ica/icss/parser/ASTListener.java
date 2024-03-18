@@ -36,8 +36,6 @@ public class ASTListener extends ICSSBaseListener {
         return ast;
     }
 
-    //TODO rest of methods, types, literals, operations
-
     @Override
     public void enterStylesheet(ICSSParser.StylesheetContext ctx) {
         Stylesheet stylesheet = new Stylesheet();
@@ -93,9 +91,15 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterDeclaration(ICSSParser.DeclarationContext ctx) {
-        Declaration declaration = new Declaration(ctx.getText());
-        currentContainer.peek().addChild(declaration);
-        currentContainer.push(declaration);
+        if(ctx.COLOR_PROPERTYS() != null){
+            Declaration declaration = new Declaration(ctx.COLOR_PROPERTYS().getText());
+            currentContainer.peek().addChild(declaration);
+            currentContainer.push(declaration);
+        } else if (ctx.WIDTH_HEIGHT_PROPERTYS() != null) {
+            Declaration declaration = new Declaration(ctx.WIDTH_HEIGHT_PROPERTYS().getText());
+            currentContainer.peek().addChild(declaration);
+            currentContainer.push(declaration);
+        }
     }
 
     @Override
@@ -105,9 +109,15 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterPropColorValue(ICSSParser.PropColorValueContext ctx) {
-        ColorLiteral colorLiteral = new ColorLiteral(ctx.getText());
-        currentContainer.peek().addChild(colorLiteral);
-        currentContainer.push(colorLiteral);
+        if (ctx.COLOR() != null) {
+            ColorLiteral colorLiteral = new ColorLiteral(ctx.getText());
+            currentContainer.peek().addChild(colorLiteral);
+            currentContainer.push(colorLiteral);
+        } else if(ctx.CAPITAL_IDENT() != null) {
+            VariableReference vr = new VariableReference(ctx.getText());
+            currentContainer.peek().addChild(vr);
+            currentContainer.push(vr);
+        }
     }
 
     @Override
@@ -211,43 +221,110 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterExpression(ICSSParser.ExpressionContext ctx) {
-        super.enterExpression(ctx);
+        if(ctx.CAPITAL_IDENT() != null){
+            VariableReference variableReference = new VariableReference(ctx.CAPITAL_IDENT().getText());
+            currentContainer.peek().addChild(variableReference);
+            currentContainer.push(variableReference);
+        } else if(ctx.TRUE() != null){
+            BoolLiteral boolLiteral = new BoolLiteral(ctx.TRUE().getText());
+            currentContainer.peek().addChild(boolLiteral);
+            currentContainer.push(boolLiteral);
+        } else if(ctx.FALSE() != null) {
+            BoolLiteral boolLiteral = new BoolLiteral(ctx.FALSE().getText());
+            currentContainer.peek().addChild(boolLiteral);
+            currentContainer.push(boolLiteral);
+        }
     }
 
     @Override
     public void exitExpression(ICSSParser.ExpressionContext ctx) {
-        super.exitExpression(ctx);
+        currentContainer.pop();
     }
 
-    @Override
-    public void enterCalc(ICSSParser.CalcContext ctx) {
-        super.enterCalc(ctx);
-    }
+//    @Override
+//    public void enterCalc(ICSSParser.CalcContext ctx) {
+////        super.enterCalc(ctx);
+//    }
 
-    @Override
-    public void exitCalc(ICSSParser.CalcContext ctx) {
-        super.exitCalc(ctx);
-    }
+//    @Override
+//    public void exitCalc(ICSSParser.CalcContext ctx) {
+//        super.exitCalc(ctx);
+//    }
 
+//TODO fix recursion, the amount of pops and when to pop the stack
     @Override
     public void enterCalcPixel(ICSSParser.CalcPixelContext ctx) {
-        super.enterCalcPixel(ctx);
+        if(ctx.MUL() != null) {
+            MultiplyOperation multiplyOperation = new MultiplyOperation();
+            currentContainer.peek().addChild(multiplyOperation);
+//            currentContainer.pop();
+            currentContainer.push(multiplyOperation);
+        } else if(ctx.PLUS() != null) {
+            AddOperation addOperation = new AddOperation();
+            currentContainer.peek().addChild(addOperation);
+//            currentContainer.pop();
+            currentContainer.push(addOperation);
+        } else if(ctx.MIN() != null) {
+            SubtractOperation subtractOperation = new SubtractOperation();
+            currentContainer.peek().addChild(subtractOperation);
+//            currentContainer.pop();
+            currentContainer.push(subtractOperation);
+        } else if(ctx.SCALAR() != null) {
+            ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.SCALAR().getText());
+            currentContainer.peek().addChild(scalarLiteral);
+            currentContainer.push(scalarLiteral);
+        } else if(ctx.PIXELSIZE() != null) {
+            PixelLiteral pixelLiteral = new PixelLiteral(ctx.PIXELSIZE().getText());
+            currentContainer.peek().addChild(pixelLiteral);
+            currentContainer.push(pixelLiteral);
+        } else if(ctx.CAPITAL_IDENT() != null) {
+            VariableReference variableReference = new VariableReference(ctx.CAPITAL_IDENT().getText());
+            currentContainer.peek().addChild(variableReference);
+            currentContainer.push(variableReference);
+        }
     }
 
-    @Override
-    public void exitCalcPixel(ICSSParser.CalcPixelContext ctx) {
-        super.exitCalcPixel(ctx);
-    }
+//    @Override
+//    public void exitCalcPixel(ICSSParser.CalcPixelContext ctx) {
+//        currentContainer.pop();
+//    }
 
     @Override
     public void enterCalcPercent(ICSSParser.CalcPercentContext ctx) {
-        super.enterCalcPercent(ctx);
+        if(ctx.MUL() != null) {
+            MultiplyOperation multiplyOperation = new MultiplyOperation();
+            currentContainer.peek().addChild(multiplyOperation);
+//            currentContainer.pop();
+            currentContainer.push(multiplyOperation);
+        } else if(ctx.PLUS() != null) {
+            AddOperation addOperation = new AddOperation();
+            currentContainer.peek().addChild(addOperation);
+//            currentContainer.pop();
+            currentContainer.push(addOperation);
+        } else if(ctx.MIN() != null) {
+            SubtractOperation subtractOperation = new SubtractOperation();
+            currentContainer.peek().addChild(subtractOperation);
+//            currentContainer.pop();
+            currentContainer.push(subtractOperation);
+        } else if(ctx.SCALAR() != null) {
+            ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.SCALAR().getText());
+            currentContainer.peek().addChild(scalarLiteral);
+            currentContainer.push(scalarLiteral);
+        } else if(ctx.PERCENTAGE() != null) {
+            PercentageLiteral percentageLiteral = new PercentageLiteral(ctx.PERCENTAGE().getText());
+            currentContainer.peek().addChild(percentageLiteral);
+            currentContainer.push(percentageLiteral);
+        } else if(ctx.CAPITAL_IDENT() != null) {
+            VariableReference variableReference = new VariableReference(ctx.CAPITAL_IDENT().getText());
+            currentContainer.peek().addChild(variableReference);
+            currentContainer.push(variableReference);
+        }
     }
 
-    @Override
-    public void exitCalcPercent(ICSSParser.CalcPercentContext ctx) {
-        super.exitCalcPercent(ctx);
-    }
+//    @Override
+//    public void exitCalcPercent(ICSSParser.CalcPercentContext ctx) {
+//        currentContainer.pop();
+//    }
 
 //    @Override
 //    public void enterEveryRule(ParserRuleContext ctx) {
