@@ -28,6 +28,8 @@ public class ASTListener extends ICSSBaseListener {
 	//Use this to keep track of the parent nodes when recursively traversing the ast
 	private IHANStack<ASTNode> currentContainer;
 
+    private int nestedCalcs = 0;
+
 	public ASTListener() {
 		ast = new AST();
 		currentContainer = new HANStack<>();
@@ -56,9 +58,7 @@ public class ASTListener extends ICSSBaseListener {
     }
 
     @Override
-    public void exitStylerule(ICSSParser.StyleruleContext ctx) {
-        currentContainer.pop();
-    }
+    public void exitStylerule(ICSSParser.StyleruleContext ctx) { currentContainer.pop(); }
 
 //    @Override
 //    public void enterBody(ICSSParser.BodyContext ctx) {
@@ -107,6 +107,7 @@ public class ASTListener extends ICSSBaseListener {
         currentContainer.pop();
     }
 
+    //TODO property kan ook een calc zijn, maar deze werkt wel doordat calc is geimplementeerd. Bij vars is dit hetzelfde alleen werkt deze niet.
     @Override
     public void enterPropColorValue(ICSSParser.PropColorValueContext ctx) {
         if (ctx.COLOR() != null) {
@@ -140,9 +141,6 @@ public class ASTListener extends ICSSBaseListener {
             currentContainer.peek().addChild(vr);
             currentContainer.push(vr);
         }
-//        else if (ctx.calc() != null){
-//            //TODO implement calc
-//        }
     }
 
     @Override
@@ -150,6 +148,8 @@ public class ASTListener extends ICSSBaseListener {
         currentContainer.pop();
     }
 
+
+    //TODO variabelen kunnen ook een berekening zijn, dit moet nog worden geimplementeerd
     @Override
     public void enterVarAssignment(ICSSParser.VarAssignmentContext ctx) {
         VariableAssignment variableAssignment = new VariableAssignment();
@@ -170,9 +170,6 @@ public class ASTListener extends ICSSBaseListener {
             } else if (ctx.varValue().SCALAR() != null) {
                 variableAssignment.expression = new ScalarLiteral(ctx.varValue().SCALAR().getText());
             }
-//            else if(ctx.varValue().calc() != null) {
-////                TODO implement calc
-//            }
         }
 
         currentContainer.peek().addChild(variableAssignment);
@@ -253,51 +250,15 @@ public class ASTListener extends ICSSBaseListener {
 //        currentContainer.pop();
 //    }
 
-//    @Override
-//    public void enterCalcPixel(ICSSParser.CalcPixelContext ctx) {
-//        if(ctx.MUL() != null) {
-//            MultiplyOperation multiplyOperation = new MultiplyOperation();
-//            currentContainer.peek().addChild(multiplyOperation);
-//            currentContainer.push(multiplyOperation);
-//        } else if(ctx.PLUS() != null) {
-//            AddOperation addOperation = new AddOperation();
-//            currentContainer.peek().addChild(addOperation);
-//            currentContainer.push(addOperation);
-//        } else if(ctx.MIN() != null) {
-//            SubtractOperation subtractOperation = new SubtractOperation();
-//            currentContainer.peek().addChild(subtractOperation);
-//            currentContainer.push(subtractOperation);
-//        }
-//        if(ctx.SCALAR() != null) {
-//            ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.SCALAR().getText());
-//            currentContainer.peek().addChild(scalarLiteral);
-//        } else if(ctx.PIXELSIZE() != null) {
-//            PixelLiteral pixelLiteral = new PixelLiteral(ctx.PIXELSIZE().getText());
-//            currentContainer.peek().addChild(pixelLiteral);
-//        } else if(ctx.CAPITAL_IDENT() != null) {
-//            VariableReference variableReference = new VariableReference(ctx.CAPITAL_IDENT().getText());
-//            currentContainer.peek().addChild(variableReference);
-//        }
-//    }
-//
-//    @Override
-//    public void exitCalcPixel(ICSSParser.CalcPixelContext ctx) {
-//        if(ctx. instanceof Operation && currentContainer.peek().getChildren().size() == 2) {
-////            currentContainer.pop();
-//        }
-//    }
-
-
     @Override
     public void enterScalar(ICSSParser.ScalarContext ctx) {
         ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.getText());
         currentContainer.peek().addChild(scalarLiteral);
-//        currentContainer.push(scalarLiteral);
     }
 
 //    @Override
 //    public void exitScalar(ICSSParser.ScalarContext ctx) {
-//
+//        super.exitScalar(ctx);
 //    }
 
 
@@ -309,13 +270,10 @@ public class ASTListener extends ICSSBaseListener {
         if (ctx.getChildCount() == 1) { // Leaf
             if(ctx.PIXELSIZE() != null) {
                 exp = new PixelLiteral(ctx.getChild(0).getText());
+                currentContainer.peek().addChild(exp);
             } else if(ctx.CAPITAL_IDENT() != null) {
                 exp = new VariableReference(ctx.getChild(0).getText());
-            }
-            currentContainer.peek().addChild(exp);
-            
-            if(currentContainer.peek().getChildren().get(0) != null) {
-                currentContainer.pop();
+                currentContainer.peek().addChild(exp);
             }
         }
 
@@ -334,14 +292,18 @@ public class ASTListener extends ICSSBaseListener {
             }
             currentContainer.peek().addChild(exp);
             currentContainer.push(exp);
+            nestedCalcs++;
         }
     }
 
+    //TODO harde grens voor poppen ingesteld met nestedCalcs, dit moet beter
     @Override
     public void exitCalcPixel(ICSSParser.CalcPixelContext ctx) {
-        if (currentContainer.peek().getChildren().size() == 1) {
+        if (nestedCalcs > 1) {
             currentContainer.pop();
+            nestedCalcs--;
         }
+
     }
 
 
@@ -379,14 +341,11 @@ public class ASTListener extends ICSSBaseListener {
 //    @Override
 //    public void enterEveryRule(ParserRuleContext ctx) {
 ////      super.enterEveryRule(ctx);
-//        System.out.println(currentContainer.peek());
 //    }
 
 //    @Override
 //    public void exitEveryRule(ParserRuleContext ctx) {
 ////        super.exitEveryRule(ctx);
-//        System.out.println(currentContainer.peek());
-//
 //    }
 
 }
