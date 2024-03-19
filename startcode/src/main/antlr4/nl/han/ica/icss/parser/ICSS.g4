@@ -69,14 +69,16 @@ elseStatement: ELSE OPEN_BRACE body+ CLOSE_BRACE;
 expression: CAPITAL_IDENT | TRUE | FALSE;
 
 calc: calcPixel | calcPercent;
-calcPixel: calcPixel MUL SCALAR
-    | SCALAR MUL calcPixel
+calcPixel: calcPixel MUL scalar
+    | scalar MUL calcPixel
     | calcPixel (PLUS|MIN) calcPixel
     | PIXELSIZE
     | CAPITAL_IDENT;
 
-calcPercent: calcPercent MUL SCALAR
-    | SCALAR MUL calcPercent
+calcPercent: calcPercent MUL scalar
+    | scalar MUL calcPercent
     | calcPercent (PLUS|MIN) calcPercent
     | PERCENTAGE
     | CAPITAL_IDENT;
+
+scalar: SCALAR;
