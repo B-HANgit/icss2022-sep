@@ -68,17 +68,8 @@ ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body+ C
 elseStatement: ELSE OPEN_BRACE body+ CLOSE_BRACE;
 expression: CAPITAL_IDENT | TRUE | FALSE;
 
-calc: calcPixel | calcPercent;
-calcPixel: calcPixel MUL scalar
-    | scalar MUL calcPixel
-    | calcPixel (PLUS|MIN) calcPixel
-    | PIXELSIZE
-    | CAPITAL_IDENT;
-
-calcPercent: calcPercent MUL scalar
-    | scalar MUL calcPercent
-    | calcPercent (PLUS|MIN) calcPercent
-    | PERCENTAGE
-    | CAPITAL_IDENT;
-
+calc: calc MUL scalar
+    | scalar MUL calc
+    | calc (PLUS|MIN) calc
+    | CAPITAL_IDENT | PIXELSIZE | PERCENTAGE;
 scalar: SCALAR;
