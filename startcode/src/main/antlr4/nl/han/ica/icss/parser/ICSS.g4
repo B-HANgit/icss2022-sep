@@ -52,10 +52,6 @@ stylerule: selector OPEN_BRACE body+ CLOSE_BRACE;
 body: ifStatement | declaration | varAssignment; //aanname dat een body altijd gevuld moet zijn (+)
 selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
-//declaratie: property COLON propValue SEMICOLON;
-//property: LOWER_IDENT;
-//propValue: var | COLOR | PIXELSIZE | PERCENTAGE | calc;
-
 declaration: COLOR_PROPERTYS COLON propColorValue SEMICOLON
     | WIDTH_HEIGHT_PROPERTYS COLON propValue SEMICOLON;
 propColorValue: CAPITAL_IDENT | COLOR;

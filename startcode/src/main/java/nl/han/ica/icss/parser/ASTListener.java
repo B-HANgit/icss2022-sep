@@ -1,8 +1,5 @@
 package nl.han.ica.icss.parser;
 
-import java.util.Stack;
-
-
 import nl.han.ica.datastructures.HANStack;
 import nl.han.ica.datastructures.IHANStack;
 import nl.han.ica.icss.ast.*;
@@ -46,8 +43,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitStylesheet(ICSSParser.StylesheetContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -60,8 +55,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitStylerule(ICSSParser.StyleruleContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -81,8 +74,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitSelector(ICSSParser.SelectorContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -100,11 +91,8 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitDeclaration(ICSSParser.DeclarationContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
-    //TODO property kan ook een calc zijn, maar deze werkt wel doordat calc is geimplementeerd. Bij vars is dit hetzelfde alleen werkt deze niet.
     @Override
     public void enterPropColorValue(ICSSParser.PropColorValueContext ctx) {
         if (ctx.COLOR() != null) {
@@ -121,8 +109,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitPropColorValue(ICSSParser.PropColorValueContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -139,18 +125,17 @@ public class ASTListener extends ICSSBaseListener {
             VariableReference vr = new VariableReference(ctx.getText());
             currentContainer.peek().addChild(vr);
             currentContainer.push(vr);
+        } else if (ctx.calc() != null) {
+            currentContainer.peek().addChild(currentContainer.peek());
+            currentContainer.push(currentContainer.peek());
         }
     }
 
     @Override
     public void exitPropValue(ICSSParser.PropValueContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
-
-    //TODO variabelen kunnen ook een berekening zijn, dit moet nog worden geimplementeerd
     @Override
     public void enterVarAssignment(ICSSParser.VarAssignmentContext ctx) {
         VariableAssignment variableAssignment = new VariableAssignment();
@@ -161,10 +146,7 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void exitVarAssignment(ICSSParser.VarAssignmentContext ctx) {
-
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -197,14 +179,14 @@ public class ASTListener extends ICSSBaseListener {
             Literal literal = new ScalarLiteral(ctx.SCALAR().getText());
             currentContainer.peek().addChild(literal);
             currentContainer.push(literal);
+        } else if(ctx.calc() != null) {
+            currentContainer.push(currentContainer.peek());
         }
     }
 
     @Override
     public void exitVarValue(ICSSParser.VarValueContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -217,8 +199,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitIfStatement(ICSSParser.IfStatementContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -231,8 +211,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitElseStatement(ICSSParser.ElseStatementContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
 
     @Override
@@ -255,12 +233,7 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitExpression(ICSSParser.ExpressionContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
     }
-
-
-    //TODO bepalen hoeveel terug poppen
 
     @Override
     public void enterCalc(ICSSParser.CalcContext ctx) {
@@ -280,6 +253,8 @@ public class ASTListener extends ICSSBaseListener {
         if (ctx.getChildCount() == 1) { // Leaf
             if(ctx.PIXELSIZE() != null) {
                 exp = new PixelLiteral(ctx.getChild(0).getText());
+            }else if(ctx.PERCENTAGE() != null) {
+                exp = new PercentageLiteral(ctx.getChild(0).getText());
             } else if(ctx.CAPITAL_IDENT() != null) {
                 exp = new VariableReference(ctx.getChild(0).getText());
             }
@@ -291,9 +266,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitCalc(ICSSParser.CalcContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
-
     }
 
     @Override
@@ -306,22 +278,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitScalar(ICSSParser.ScalarContext ctx) {
         currentContainer.pop();
-        System.out.println(currentContainer.peek());
-
-    }
-
-
-    @Override
-    public void enterEveryRule(ParserRuleContext ctx) {
-//      super.enterEveryRule(ctx);
-//        System.out.println(currentContainer.peek());
-    }
-
-    @Override
-    public void exitEveryRule(ParserRuleContext ctx) {
-//        super.exitEveryRule(ctx);
-//        System.out.println(currentContainer.peek());
-//        System.out.println(ctx.getText());
     }
 
 }
