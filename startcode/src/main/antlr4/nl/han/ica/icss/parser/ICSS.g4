@@ -66,6 +66,7 @@ expression: CAPITAL_IDENT | TRUE | FALSE;
 
 calc: calc MUL scalar
     | scalar MUL calc
+    | scalar MUL scalar
     | calc (PLUS|MIN) calc
     | CAPITAL_IDENT | PIXELSIZE | PERCENTAGE;
 scalar: SCALAR;

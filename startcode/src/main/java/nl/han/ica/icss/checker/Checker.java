@@ -14,10 +14,6 @@ import java.util.HashMap;
 
 import nl.han.ica.icss.ast.*;
 
-
-//TODO    Controleer of de operanden van de operaties plus en min van gelijk type zijn. Je mag geen pixels bij percentages optellen bijvoorbeeld.
-//        Controleer dat bij vermenigvuldigen minimaal een operand een scalaire waarde is. Zo mag 20% * 3 en 4 * 5 wel, maar mag 2px * 3px niet.
-
 public class Checker {
 
     private IHANLinkedList<HashMap<String, ExpressionType>> variableTypes;
@@ -61,14 +57,21 @@ public class Checker {
     private void checkDeclaration(Declaration node) {
         ExpressionType valueType = getType(node.expression);
         String propertyName = node.property.name.toLowerCase();
+
+        System.out.println("Property: " + propertyName + " Value: " + valueType);
+
+        if(valueType == ExpressionType.UNDEFINED){
+            node.setError("Value of property " + propertyName + " is undefined");
+        }
+
         if(propertyName.equals("color") || propertyName.equals("background-color")){
             if(valueType != ExpressionType.COLOR){
                 node.setError("Value of property " + propertyName + " should be of type color");
             }
         }
         else if(propertyName.equals("width") || propertyName.equals("height")){
-            if(valueType != ExpressionType.PIXEL || valueType != ExpressionType.PERCENTAGE){
-                node.setError("Value of property " + propertyName + " should be of type pixel");
+            if(valueType != ExpressionType.PIXEL && valueType != ExpressionType.PERCENTAGE){
+                node.setError("Value of property " + propertyName + " should not be of type " + valueType);
             }
         }
     }
@@ -96,11 +99,12 @@ public class Checker {
                 node.setError("At least one operand of multiplication should be a scalar");
             }
         } else {
+            if(leftType == ExpressionType.SCALAR || rightType == ExpressionType.SCALAR){
+                node.setError("Cannot perform operation (plus/min) with scalar");
+            }
+
             if (leftType != rightType) {
                 node.setError("Operands of operation are not of the same type");
-            }
-            if (leftType == ExpressionType.SCALAR || rightType == ExpressionType.SCALAR){
-                node.setError("Cannot perform operation (plus/min) with scalar");
             }
         }
     }
@@ -159,8 +163,36 @@ public class Checker {
                 expression.setError("Variable " + variableName + " is not defined (at this scope)");
             }
             return expressionType;
+        } else if(expression instanceof Operation){
+            ExpressionType expressionType = getOperationType((Operation) expression);
+            if(expressionType == ExpressionType.UNDEFINED){
+                //TODO fix error message
+                expression.setError("Opperation " + expression + " is not defined");
+            }
+            return expressionType;
         }
         return ExpressionType.UNDEFINED;
+    }
+
+    private ExpressionType getOperationType(Operation expression) {
+        ExpressionType leftType = getType(expression.lhs);
+        ExpressionType rightType = getType(expression.rhs);
+
+        if(leftType == ExpressionType.UNDEFINED || rightType == ExpressionType.UNDEFINED){
+            return ExpressionType.UNDEFINED;
+        }
+
+        if(leftType == ExpressionType.SCALAR && rightType == ExpressionType.SCALAR){
+            return ExpressionType.SCALAR;
+        } else if(leftType == ExpressionType.SCALAR){
+            return rightType;
+        } else if(rightType == ExpressionType.SCALAR) {
+            return leftType;
+        } else if(leftType == rightType){
+            return leftType;
+        } else {
+            return ExpressionType.UNDEFINED;
+        }
     }
 
     private ExpressionType getVariableType(String variableName) {
