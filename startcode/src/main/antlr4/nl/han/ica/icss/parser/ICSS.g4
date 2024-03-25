@@ -69,4 +69,4 @@ calc: calc MUL scalar
     | scalar MUL scalar
     | calc (PLUS|MIN) calc
     | CAPITAL_IDENT | PIXELSIZE | PERCENTAGE;
-scalar: SCALAR;
+scalar: SCALAR | CAPITAL_IDENT;

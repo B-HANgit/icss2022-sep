@@ -270,9 +270,15 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterScalar(ICSSParser.ScalarContext ctx) {
-        ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.getText());
-        currentContainer.peek().addChild(scalarLiteral);
-        currentContainer.push(scalarLiteral);
+        if(ctx.SCALAR() != null) {
+            ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.SCALAR().getText());
+            currentContainer.peek().addChild(scalarLiteral);
+            currentContainer.push(scalarLiteral);
+        } else if(ctx.CAPITAL_IDENT() != null) {
+            VariableReference variableReference = new VariableReference(ctx.CAPITAL_IDENT().getText());
+            currentContainer.peek().addChild(variableReference);
+            currentContainer.push(variableReference);
+        }
     }
 
     @Override
