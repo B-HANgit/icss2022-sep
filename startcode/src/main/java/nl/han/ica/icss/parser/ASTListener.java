@@ -78,36 +78,15 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterDeclaration(ICSSParser.DeclarationContext ctx) {
-        Declaration declaration = null;
-        if(ctx.COLOR_PROPERTYS() != null){
-            declaration = new Declaration(ctx.COLOR_PROPERTYS().getText());
-        } else if (ctx.WIDTH_HEIGHT_PROPERTYS() != null) {
-            declaration = new Declaration(ctx.WIDTH_HEIGHT_PROPERTYS().getText());
+        if(ctx.PROPERTYS() != null){
+            Declaration declaration = new Declaration(ctx.PROPERTYS().getText());
+            currentContainer.peek().addChild(declaration);
+            currentContainer.push(declaration);
         }
-        currentContainer.peek().addChild(declaration);
-        currentContainer.push(declaration);
     }
 
     @Override
     public void exitDeclaration(ICSSParser.DeclarationContext ctx) {
-        currentContainer.pop();
-    }
-
-    @Override
-    public void enterPropColorValue(ICSSParser.PropColorValueContext ctx) {
-        if (ctx.COLOR() != null) {
-            ColorLiteral colorLiteral = new ColorLiteral(ctx.getText());
-            currentContainer.peek().addChild(colorLiteral);
-            currentContainer.push(colorLiteral);
-        } else if(ctx.CAPITAL_IDENT() != null) {
-            VariableReference vr = new VariableReference(ctx.getText());
-            currentContainer.peek().addChild(vr);
-            currentContainer.push(vr);
-        }
-    }
-
-    @Override
-    public void exitPropColorValue(ICSSParser.PropColorValueContext ctx) {
         currentContainer.pop();
     }
 
@@ -125,6 +104,10 @@ public class ASTListener extends ICSSBaseListener {
             VariableReference vr = new VariableReference(ctx.getText());
             currentContainer.peek().addChild(vr);
             currentContainer.push(vr);
+        } else if(ctx.COLOR() != null) {
+            Literal literal = new ColorLiteral(ctx.getText());
+            currentContainer.peek().addChild(literal);
+            currentContainer.push(literal);
         } else if (ctx.calc() != null) {
             currentContainer.peek().addChild(currentContainer.peek());
             currentContainer.push(currentContainer.peek());
@@ -135,6 +118,66 @@ public class ASTListener extends ICSSBaseListener {
     public void exitPropValue(ICSSParser.PropValueContext ctx) {
         currentContainer.pop();
     }
+
+//    @Override
+//    public void enterDeclaration(ICSSParser.DeclarationContext ctx) {
+//        Declaration declaration = null;
+//        if(ctx.COLOR_PROPERTYS() != null){
+//            declaration = new Declaration(ctx.COLOR_PROPERTYS().getText());
+//        } else if (ctx.WIDTH_HEIGHT_PROPERTYS() != null) {
+//            declaration = new Declaration(ctx.WIDTH_HEIGHT_PROPERTYS().getText());
+//        }
+//        currentContainer.peek().addChild(declaration);
+//        currentContainer.push(declaration);
+//    }
+//
+//    @Override
+//    public void exitDeclaration(ICSSParser.DeclarationContext ctx) {
+//        currentContainer.pop();
+//    }
+//
+//    @Override
+//    public void enterPropColorValue(ICSSParser.PropColorValueContext ctx) {
+//        if (ctx.COLOR() != null) {
+//            ColorLiteral colorLiteral = new ColorLiteral(ctx.getText());
+//            currentContainer.peek().addChild(colorLiteral);
+//            currentContainer.push(colorLiteral);
+//        } else if(ctx.CAPITAL_IDENT() != null) {
+//            VariableReference vr = new VariableReference(ctx.getText());
+//            currentContainer.peek().addChild(vr);
+//            currentContainer.push(vr);
+//        }
+//    }
+//
+//    @Override
+//    public void exitPropColorValue(ICSSParser.PropColorValueContext ctx) {
+//        currentContainer.pop();
+//    }
+//
+//    @Override
+//    public void enterPropValue(ICSSParser.PropValueContext ctx) {
+//        if(ctx.PIXELSIZE() != null) {
+//            Literal literal = new PixelLiteral(ctx.getText());
+//            currentContainer.peek().addChild(literal);
+//            currentContainer.push(literal);
+//        } else if(ctx.PERCENTAGE() != null) {
+//            Literal literal = new PercentageLiteral(ctx.getText());
+//            currentContainer.peek().addChild(literal);
+//            currentContainer.push(literal);
+//        } else if(ctx.CAPITAL_IDENT() != null) {
+//            VariableReference vr = new VariableReference(ctx.getText());
+//            currentContainer.peek().addChild(vr);
+//            currentContainer.push(vr);
+//        } else if (ctx.calc() != null) {
+//            currentContainer.peek().addChild(currentContainer.peek());
+//            currentContainer.push(currentContainer.peek());
+//        }
+//    }
+//
+//    @Override
+//    public void exitPropValue(ICSSParser.PropValueContext ctx) {
+//        currentContainer.pop();
+//    }
 
     @Override
     public void enterVarAssignment(ICSSParser.VarAssignmentContext ctx) {

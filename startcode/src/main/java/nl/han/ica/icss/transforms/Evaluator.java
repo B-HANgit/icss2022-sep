@@ -1,5 +1,6 @@
 package nl.han.ica.icss.transforms;
 
+import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
@@ -15,6 +16,7 @@ import java.util.LinkedList;
 public class Evaluator implements Transform {
 
     private IHANLinkedList<HashMap<String, Literal>> variableValues;
+    private int scope = 0;
 
 
 //    Evalueer expressies. Schrijf een transformatie in Evaluator die alle Expression knopen in de AST door een Literal knoop met de berekende waarde vervangt.
@@ -27,14 +29,19 @@ public class Evaluator implements Transform {
 
 
     public Evaluator() {
-        //variableValues = new HANLinkedList<>();
+        variableValues = new HANLinkedList<>();
     }
 
     @Override
     public void apply(AST ast) {
-        //variableValues = new HANLinkedList<>();
-
+//        variableValues = new HANLinkedList<>();
+        variableValues.insert(scope, new HashMap<>());
+        walkTree(ast.root);
     }
+
+    private void walkTree(Stylesheet root) {
+    }
+
 
     //    private Literal evaluateOperation(Operation operation) {
 //        Literal left = evaluateExpression(operation.lhs);
@@ -49,5 +56,17 @@ public class Evaluator implements Transform {
 //        return null;
 //    }
 
-    
+    private void createNewScope() {
+        scope++;
+        variableValues.insert(scope, new HashMap<>());
+    }
+
+    private void deleteScope() {
+        variableValues.delete(scope);
+        scope--;
+    }
+
+    private void printVariables(int scope) {
+        System.out.println("Scope " + scope + ": " + variableValues.get(scope).toString());
+    }
 }

@@ -57,9 +57,7 @@ public class Checker {
     private void checkDeclaration(Declaration node) {
         ExpressionType valueType = getType(node.expression);
         String propertyName = node.property.name.toLowerCase();
-
-        System.out.println("Property: " + propertyName + " Value: " + valueType);
-
+//        System.out.println("Property: " + propertyName + " Value: " + valueType);
         if(valueType == ExpressionType.UNDEFINED){
             node.setError("Value of property " + propertyName + " is undefined");
         }
@@ -76,7 +74,6 @@ public class Checker {
         }
     }
 
-    //TODO een scalar*scalar kan alleen in een var-calc niet in een prop-calc
     private void checkOperation(Operation node) {
         ExpressionType leftType = getType(node.lhs);
         ExpressionType rightType = getType(node.rhs);

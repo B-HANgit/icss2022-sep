@@ -2,8 +2,10 @@ grammar ICSS;
 
 //--- LEXER: ---
 
-COLOR_PROPERTYS: 'color' | 'background-color';
-WIDTH_HEIGHT_PROPERTYS: 'width' | 'height';
+//COLOR_PROPERTYS: 'color' | 'background-color';
+//WIDTH_HEIGHT_PROPERTYS: 'width' | 'height';
+
+PROPERTYS: 'color' | 'background-color' | 'width' | 'height';
 
 // IF support:
 IF: 'if';
@@ -52,10 +54,14 @@ stylerule: selector OPEN_BRACE body* CLOSE_BRACE;
 body: ifStatement | declaration | varAssignment; //aanname dat een body leeg mag zijn (+)
 selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
-declaration: COLOR_PROPERTYS COLON propColorValue SEMICOLON
-    | WIDTH_HEIGHT_PROPERTYS COLON propValue SEMICOLON;
-propColorValue: CAPITAL_IDENT | COLOR;
-propValue: CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | calc;
+//declaration: COLOR_PROPERTYS COLON propColorValue SEMICOLON
+//    | WIDTH_HEIGHT_PROPERTYS COLON propValue SEMICOLON;
+//propColorValue: CAPITAL_IDENT | COLOR;
+//propValue: CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | calc;
+
+declaration: PROPERTYS COLON propValue SEMICOLON;
+propValue: CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | COLOR | calc;
+
 
 varAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR varValue SEMICOLON;
 varValue: CAPITAL_IDENT | COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE | calc;
