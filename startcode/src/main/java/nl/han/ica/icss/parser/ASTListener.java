@@ -250,6 +250,17 @@ public class ASTListener extends ICSSBaseListener {
             currentContainer.push(exp);
         }
 
+//        if (ctx.getChildCount() == 1) { // Leaf
+//            if(ctx.PIXELSIZE() != null) {
+//                exp = new PixelLiteral(ctx.getChild(0).getText());
+//            }else if(ctx.PERCENTAGE() != null) {
+//                exp = new PercentageLiteral(ctx.getChild(0).getText());
+//            } else if(ctx.CAPITAL_IDENT() != null) {
+//                exp = new VariableReference(ctx.getChild(0).getText());
+//            }
+//            currentContainer.peek().addChild(exp);
+//            currentContainer.push(exp);
+//        }
         if (ctx.getChildCount() == 1) { // Leaf
             if(ctx.PIXELSIZE() != null) {
                 exp = new PixelLiteral(ctx.getChild(0).getText());
@@ -257,6 +268,8 @@ public class ASTListener extends ICSSBaseListener {
                 exp = new PercentageLiteral(ctx.getChild(0).getText());
             } else if(ctx.CAPITAL_IDENT() != null) {
                 exp = new VariableReference(ctx.getChild(0).getText());
+            } else if(ctx.SCALAR() != null) {
+                exp = new ScalarLiteral(ctx.getChild(0).getText());
             }
             currentContainer.peek().addChild(exp);
             currentContainer.push(exp);
@@ -268,22 +281,22 @@ public class ASTListener extends ICSSBaseListener {
         currentContainer.pop();
     }
 
-    @Override
-    public void enterScalar(ICSSParser.ScalarContext ctx) {
-        if(ctx.SCALAR() != null) {
-            ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.SCALAR().getText());
-            currentContainer.peek().addChild(scalarLiteral);
-            currentContainer.push(scalarLiteral);
-        } else if(ctx.CAPITAL_IDENT() != null) {
-            VariableReference variableReference = new VariableReference(ctx.CAPITAL_IDENT().getText());
-            currentContainer.peek().addChild(variableReference);
-            currentContainer.push(variableReference);
-        }
-    }
-
-    @Override
-    public void exitScalar(ICSSParser.ScalarContext ctx) {
-        currentContainer.pop();
-    }
+//    @Override
+//    public void enterScalar(ICSSParser.ScalarContext ctx) {
+//        if(ctx.SCALAR() != null) {
+//            ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.SCALAR().getText());
+//            currentContainer.peek().addChild(scalarLiteral);
+//            currentContainer.push(scalarLiteral);
+//        } else if(ctx.CAPITAL_IDENT() != null) {
+//            VariableReference variableReference = new VariableReference(ctx.CAPITAL_IDENT().getText());
+//            currentContainer.peek().addChild(variableReference);
+//            currentContainer.push(variableReference);
+//        }
+//    }
+//
+//    @Override
+//    public void exitScalar(ICSSParser.ScalarContext ctx) {
+//        currentContainer.pop();
+//    }
 
 }

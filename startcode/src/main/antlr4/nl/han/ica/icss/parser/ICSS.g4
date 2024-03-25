@@ -48,8 +48,8 @@ ASSIGNMENT_OPERATOR: ':=';
 //--- PARSER: ---
 
 stylesheet: (stylerule|varAssignment)* EOF;
-stylerule: selector OPEN_BRACE body+ CLOSE_BRACE;
-body: ifStatement | declaration | varAssignment; //aanname dat een body altijd gevuld moet zijn (+)
+stylerule: selector OPEN_BRACE body* CLOSE_BRACE;
+body: ifStatement | declaration | varAssignment; //aanname dat een body leeg mag zijn (+)
 selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
 declaration: COLOR_PROPERTYS COLON propColorValue SEMICOLON
@@ -60,13 +60,17 @@ propValue: CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | calc;
 varAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR varValue SEMICOLON;
 varValue: CAPITAL_IDENT | COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE | calc;
 
-ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body+ CLOSE_BRACE (elseStatement)?;
-elseStatement: ELSE OPEN_BRACE body+ CLOSE_BRACE;
+ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body* CLOSE_BRACE (elseStatement)?;
+elseStatement: ELSE OPEN_BRACE body* CLOSE_BRACE;
 expression: CAPITAL_IDENT | TRUE | FALSE;
 
-calc: calc MUL scalar
-    | scalar MUL calc
-    | scalar MUL scalar
+//calc: calc MUL scalar
+//    | scalar MUL calc
+//    | scalar MUL scalar
+//    | calc (PLUS|MIN) calc
+//    | CAPITAL_IDENT | PIXELSIZE | PERCENTAGE;
+//scalar: SCALAR | CAPITAL_IDENT;
+
+calc: calc MUL calc
     | calc (PLUS|MIN) calc
-    | CAPITAL_IDENT | PIXELSIZE | PERCENTAGE;
-scalar: SCALAR | CAPITAL_IDENT;
+    | CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | SCALAR;
