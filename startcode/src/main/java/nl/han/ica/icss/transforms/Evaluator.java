@@ -7,15 +7,15 @@ import nl.han.ica.icss.ast.literals.*;
 import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
-import nl.han.ica.icss.ast.types.ExpressionType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 public class Evaluator implements Transform {
 
     private IHANLinkedList<HashMap<String, Literal>> variableValues;
     private int scope = 0;
+    private ASTNode parent;
 
 //TODO hoe verwijder je een node uit de AST waar je al voorbij bemt (als je in ifclause zit  kun je niet de body routen naar een level hoer en dan de eiegn node verwijderen?
 // idee: previoud parent bijhouden en wanneer over de childWalker dan een aanroep om de body voor if en expression voor rest als kind toevoegen aan die parent en die node te verwijderen???
@@ -36,20 +36,18 @@ public class Evaluator implements Transform {
 
     @Override
     public void apply(AST ast) {
-//        variableValues = new HANLinkedList<>();
         variableValues.insert(scope, new HashMap<>());
-        walkTree(ast.root);
+        walkTree(null, ast.root);
     }
 
-    private void walkTree(ASTNode node) {
+    private void walkTree(ASTNode parent, ASTNode node) {
         if (node instanceof VariableAssignment) {
             evaluateVariableAssignment(scope, (VariableAssignment) node);
             childWalkTree(node);
-            printVariables(scope);
         }
         else if (node instanceof IfClause) {
             createNewScope();
-            evaluateIfStatement((IfClause) node);
+            evaluateIfStatement(parent, (IfClause) node);
             childWalkTree(node);
             deleteScope();
         } else if (node instanceof Stylerule) {
@@ -72,7 +70,7 @@ public class Evaluator implements Transform {
 
     private void childWalkTree(ASTNode node){
         for (ASTNode child : node.getChildren()) {
-            walkTree(child);
+            walkTree(node, child);
         }
     }
 
@@ -102,9 +100,6 @@ public class Evaluator implements Transform {
         }
     }
 
-
-
-
     private Literal getValue(Expression expression) {
         if(expression instanceof BoolLiteral) {
             return (BoolLiteral) expression;
@@ -132,7 +127,6 @@ public class Evaluator implements Transform {
         }
         return null;
     }
-
 
     private Literal evaluateOperation(Operation operation) {
         Literal left = getValue(operation.lhs);
@@ -180,18 +174,26 @@ public class Evaluator implements Transform {
         return null;
     }
 
-
-
-    private void evaluateIfStatement(IfClause node) {
+    private void evaluateIfStatement(ASTNode parent, IfClause node) {
+        ArrayList<ASTNode> body = null;
         Literal condition = getValue(node.conditionalExpression);
         if (condition instanceof BoolLiteral) {
             if (((BoolLiteral) condition).value) {
-                node.removeChild(node.conditionalExpression);
-                node.removeChild(node.elseClause);
+                body = node.body;
             } else {
-                node.removeChild(node.conditionalExpression);
-                for(ASTNode child : node.body){
-                    node.removeChild(child);
+                if (node.elseClause != null) {
+                    body = node.elseClause.body;
+                }
+            }
+        }
+
+        parent.removeChild(node);
+        if(body != null){
+            for(ASTNode child : body){
+                if(child instanceof IfClause){
+                    evaluateIfStatement(parent, (IfClause) child);
+                } else {
+                    parent.addChild(child);
                 }
             }
         }

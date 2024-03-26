@@ -17,9 +17,9 @@ BOX_BRACKET_CLOSE: ']';
 //Literals
 TRUE: 'TRUE';
 FALSE: 'FALSE';
-PIXELSIZE: [0-9]+ 'px';
-PERCENTAGE: [0-9]+ '%';
-SCALAR: [0-9]+;
+PIXELSIZE: ('-')?[0-9]+ 'px';
+PERCENTAGE: ('-')?[0-9]+ '%';
+SCALAR: ('-')?[0-9]+;
 
 
 //Color value takes precedence over id idents
@@ -48,20 +48,13 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-
 stylesheet: (stylerule|varAssignment)* EOF;
 stylerule: selector OPEN_BRACE body* CLOSE_BRACE;
 body: ifStatement | declaration | varAssignment; //aanname dat een body leeg mag zijn (+)
 selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
-//declaration: COLOR_PROPERTYS COLON propColorValue SEMICOLON
-//    | WIDTH_HEIGHT_PROPERTYS COLON propValue SEMICOLON;
-//propColorValue: CAPITAL_IDENT | COLOR;
-//propValue: CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | calc;
-
 declaration: PROPERTYS COLON propValue SEMICOLON;
 propValue: CAPITAL_IDENT | PIXELSIZE | PERCENTAGE | COLOR | calc;
-
 
 varAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR varValue SEMICOLON;
 varValue: CAPITAL_IDENT | COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE | calc;
@@ -69,13 +62,6 @@ varValue: CAPITAL_IDENT | COLOR | PIXELSIZE | PERCENTAGE | SCALAR | TRUE | FALSE
 ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body* CLOSE_BRACE (elseStatement)?;
 elseStatement: ELSE OPEN_BRACE body* CLOSE_BRACE;
 expression: CAPITAL_IDENT | TRUE | FALSE;
-
-//calc: calc MUL scalar
-//    | scalar MUL calc
-//    | scalar MUL scalar
-//    | calc (PLUS|MIN) calc
-//    | CAPITAL_IDENT | PIXELSIZE | PERCENTAGE;
-//scalar: SCALAR | CAPITAL_IDENT;
 
 calc: calc MUL calc
     | calc (PLUS|MIN) calc

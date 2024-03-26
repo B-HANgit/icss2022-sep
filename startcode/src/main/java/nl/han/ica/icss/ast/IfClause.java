@@ -75,4 +75,10 @@ public class IfClause extends ASTNode {
         return conditionalExpression;
     }
     public ElseClause getElseClause() { return elseClause; }
+
+    @Override
+    public ASTNode removeChild(ASTNode child) {
+        body.remove(child);
+        return this;
+    }
 }
