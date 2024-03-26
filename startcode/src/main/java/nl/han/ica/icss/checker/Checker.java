@@ -32,8 +32,9 @@ public class Checker {
             printVariables(scope);
         }
         else if (node instanceof IfClause) {
-            createNewScope();
+            //TODO check first then scope or reverse?
             checkIfStatement((IfClause) node);
+            createNewScope();
             childWalkTree(node);
             deleteScope();
         } else if (node instanceof Stylerule) {
@@ -121,14 +122,31 @@ public class Checker {
             assignment.setError("Variable " + variableName + " has an undefined type");
         }
 
-        // Check if the variable is already defined in the current scope
-        if (variableTypes.get(depth).containsKey(variableName)) {
-            // Variable already defined, update its type
+        //check if variable is already defined in current and all underlying scopes
+        ExpressionType expressionType = getVariableType(variableName);
+        if(expressionType != ExpressionType.UNDEFINED){
+            if(expressionType != valueType){
+                assignment.setError("Variable " + variableName + " is already defined with a different type");
+            }
+//            System.out.println("Variable " + variableName + " is already defined with type " + expressionType + " in scope " + getVariableScope(variableName));
+            //update the value of the variable
             variableTypes.get(depth).put(variableName, valueType);
+
+            //TODO versie die laagste scope bijwerkt
+//            variableTypes.get(getVariableScope(variableName)).put(variableName, valueType);
         } else {
             // Variable not defined, add it to the current scope
             variableTypes.get(depth).put(variableName, valueType);
         }
+
+//        // Check if the variable is already defined in the current scope
+//        if (variableTypes.get(depth).containsKey(variableName)) {
+//            // Variable already defined, update its type
+//            variableTypes.get(depth).put(variableName, valueType);
+//        } else {
+//            // Variable not defined, add it to the current scope
+//            variableTypes.get(depth).put(variableName, valueType);
+//        }
     }
 
     private void checkIfStatement(IfClause node) {
@@ -199,6 +217,15 @@ public class Checker {
             }
         }
         return ExpressionType.UNDEFINED;
+    }
+
+    private int getVariableScope(String variableName) {
+        for (int i = scope; i >= 0; i--) {
+            if (variableTypes.get(i).containsKey(variableName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void createNewScope() {

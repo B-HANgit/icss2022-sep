@@ -1,11 +1,9 @@
 grammar ICSS;
 
 //--- LEXER: ---
-
-//COLOR_PROPERTYS: 'color' | 'background-color';
-//WIDTH_HEIGHT_PROPERTYS: 'width' | 'height';
-
 PROPERTYS: 'color' | 'background-color' | 'width' | 'height';
+LINE_COMMENT: '//' ~[\r\n]* -> skip;
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;
 
 // IF support:
 IF: 'if';
@@ -17,9 +15,9 @@ BOX_BRACKET_CLOSE: ']';
 //Literals
 TRUE: 'TRUE';
 FALSE: 'FALSE';
-PIXELSIZE: ('-')?[0-9]+ 'px';
-PERCENTAGE: ('-')?[0-9]+ '%';
-SCALAR: ('-')?[0-9]+;
+PIXELSIZE: (MIN)?[0-9]+ 'px';
+PERCENTAGE: (MIN)?[0-9]+ '%';
+SCALAR: (MIN)?[0-9]+;
 
 
 //Color value takes precedence over id idents

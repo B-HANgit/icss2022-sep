@@ -15,20 +15,6 @@ public class Evaluator implements Transform {
 
     private IHANLinkedList<HashMap<String, Literal>> variableValues;
     private int scope = 0;
-    private ASTNode parent;
-
-//TODO hoe verwijder je een node uit de AST waar je al voorbij bemt (als je in ifclause zit  kun je niet de body routen naar een level hoer en dan de eiegn node verwijderen?
-// idee: previoud parent bijhouden en wanneer over de childWalker dan een aanroep om de body voor if en expression voor rest als kind toevoegen aan die parent en die node te verwijderen???
-
-
-//    Evalueer expressies. Schrijf een transformatie in Evaluator die alle Expression knopen in de AST door een Literal knoop met de berekende waarde vervangt.
-//
-//    Evalueer if/else expressies.
-//    Schrijf een transformatie in Evaluator die alle IfClauses uit de AST verwijdert.
-//    Wanneer de conditie van de IfClause TRUE is wordt deze vervangen door de body van het if-statement.
-//    Als de conditie FALSE is dan vervang je de IfClause door de body van de ElseClause.
-//    Als er geen ElseClause is bij een negatieve conditie dan verwijder je de IfClause volledig uit de AST.
-
 
     public Evaluator() {
         variableValues = new HANLinkedList<>();
@@ -44,10 +30,13 @@ public class Evaluator implements Transform {
         if (node instanceof VariableAssignment) {
             evaluateVariableAssignment(scope, (VariableAssignment) node);
             childWalkTree(node);
+
+            printVariables(scope);
         }
         else if (node instanceof IfClause) {
-            createNewScope();
+            //TODO check first then scope or reverse?
             evaluateIfStatement(parent, (IfClause) node);
+            createNewScope();
             childWalkTree(node);
             deleteScope();
         } else if (node instanceof Stylerule) {
@@ -89,15 +78,37 @@ public class Evaluator implements Transform {
 
         assignment.expression = literal;
 
-
-        // Check if the variable is already defined in the current scope
-        if (variableValues.get(depth).containsKey(variableName)) {
-            // Variable already defined, update its type
+        //check if variable is already defined in current and all underlying scopes
+        Literal value = getVariableValue(variableName);
+        if(value != null){
+            System.out.println("Variable " + variableName + " is already defined in scope " + getVariableScope(variableName));
+            //update the value of the variable
             variableValues.get(depth).put(variableName, literal);
+            //TODO versie die laagste scope bijwerkt
+//            variableValues.get(getVariableScope(variableName)).put(variableName, literal);
+
         } else {
             // Variable not defined, add it to the current scope
             variableValues.get(depth).put(variableName, literal);
         }
+
+//        // Check if the variable is already defined in the current scope
+//        if (variableValues.get(depth).containsKey(variableName)) {
+//            // Variable already defined, update its type
+//            variableValues.get(depth).put(variableName, literal);
+//        } else {
+//            // Variable not defined, add it to the current scope
+//            variableValues.get(depth).put(variableName, literal);
+//        }
+    }
+
+    private int getVariableScope(String variableName) {
+        for (int i = scope; i >= 0; i--) {
+            if (variableValues.get(i).containsKey(variableName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private Literal getValue(Expression expression) {
@@ -174,6 +185,7 @@ public class Evaluator implements Transform {
         return null;
     }
 
+    //TODO conditional stays false even if variable is defined TRUE in a lower scope
     private void evaluateIfStatement(ASTNode parent, IfClause node) {
         ArrayList<ASTNode> body = null;
         Literal condition = getValue(node.conditionalExpression);
