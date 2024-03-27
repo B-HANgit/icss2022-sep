@@ -45,7 +45,7 @@ public class Evaluator implements Transform {
             deleteScope();
         }
         else if (node instanceof Declaration) {
-            evaluateDeclaration((Declaration) node);
+            evaluateDeclaration(parent, (Declaration) node);
             childWalkTree(node);
         }
         else if (node instanceof Operation) {
@@ -63,9 +63,23 @@ public class Evaluator implements Transform {
         }
     }
 
-    private void evaluateDeclaration(Declaration node) {
+    private void evaluateDeclaration(ASTNode parent, Declaration node) {
         //nieuwe waarde toekennen aan property (want kan een var zijn in dit geval).
         node.expression = getValue(node.expression);
+        //TODO test for no double declarations of same kind
+//        if(parent instanceof Stylerule){
+//            System.out.println(parent.getChildren());
+//
+//            for(ASTNode child : parent.getChildren()){
+//                if(child instanceof Declaration){
+//                    Declaration declaration = (Declaration) child;
+//                    if(declaration.property.name.equals(node.property.name)){
+//                        declaration.expression = node.expression;
+//                        parent.removeChild(node);
+//                    }
+//                }
+//            }
+//        }
     }
 
     private void evaluateVariableAssignment(int depth, VariableAssignment assignment) {
@@ -84,7 +98,7 @@ public class Evaluator implements Transform {
             System.out.println("Variable " + variableName + " is already defined in scope " + getVariableScope(variableName));
             //update the value of the variable
             variableValues.get(depth).put(variableName, literal);
-            //TODO versie die laagste scope bijwerkt
+            //versie die laagste scope bijwerkt
 //            variableValues.get(getVariableScope(variableName)).put(variableName, literal);
 
         } else {
@@ -185,7 +199,6 @@ public class Evaluator implements Transform {
         return null;
     }
 
-    //TODO conditional stays false even if variable is defined TRUE in a lower scope
     private void evaluateIfStatement(ASTNode parent, IfClause node) {
         ArrayList<ASTNode> body = null;
         Literal condition = getValue(node.conditionalExpression);
@@ -204,6 +217,8 @@ public class Evaluator implements Transform {
             for(ASTNode child : body){
                 if(child instanceof IfClause){
                     evaluateIfStatement(parent, (IfClause) child);
+                } else if (child instanceof VariableAssignment) {
+                    evaluateVariableAssignment(scope, (VariableAssignment) child);
                 } else {
                     parent.addChild(child);
                 }

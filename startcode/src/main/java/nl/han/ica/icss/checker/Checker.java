@@ -29,7 +29,7 @@ public class Checker {
             checkVariableAssignment(scope, (VariableAssignment) node);
             childWalkTree(node);
 
-            printVariables(scope);
+//            printVariables(scope);
         }
         else if (node instanceof IfClause) {
             //TODO check first then scope or reverse?
@@ -132,7 +132,7 @@ public class Checker {
             //update the value of the variable
             variableTypes.get(depth).put(variableName, valueType);
 
-            //TODO versie die laagste scope bijwerkt
+            //versie die laagste scope bijwerkt
 //            variableTypes.get(getVariableScope(variableName)).put(variableName, valueType);
         } else {
             // Variable not defined, add it to the current scope
