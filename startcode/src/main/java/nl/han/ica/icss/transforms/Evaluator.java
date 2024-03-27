@@ -34,7 +34,6 @@ public class Evaluator implements Transform {
             printVariables(scope);
         }
         else if (node instanceof IfClause) {
-            //TODO check first then scope or reverse?
             evaluateIfStatement(parent, (IfClause) node);
             createNewScope();
             childWalkTree(node);
@@ -48,10 +47,12 @@ public class Evaluator implements Transform {
             evaluateDeclaration(parent, (Declaration) node);
             childWalkTree(node);
         }
-        else if (node instanceof Operation) {
-            evaluateOperation((Operation) node);
-            childWalkTree(node);
-        }
+        //komt hier niet, wordt aangeroepen in overige functies.
+//        else if (node instanceof Operation) {
+//            System.out.println("Operation");
+//            evaluateOperation((Operation) node);
+//            childWalkTree(node);
+//        }
         else{
             childWalkTree(node);
         }
@@ -65,21 +66,8 @@ public class Evaluator implements Transform {
 
     private void evaluateDeclaration(ASTNode parent, Declaration node) {
         //nieuwe waarde toekennen aan property (want kan een var zijn in dit geval).
+        //als een property 2x voorkomt waarden van een property worden niet overschreven, maar toegevoegd.
         node.expression = getValue(node.expression);
-        //TODO test for no double declarations of same kind
-//        if(parent instanceof Stylerule){
-//            System.out.println(parent.getChildren());
-//
-//            for(ASTNode child : parent.getChildren()){
-//                if(child instanceof Declaration){
-//                    Declaration declaration = (Declaration) child;
-//                    if(declaration.property.name.equals(node.property.name)){
-//                        declaration.expression = node.expression;
-//                        parent.removeChild(node);
-//                    }
-//                }
-//            }
-//        }
     }
 
     private void evaluateVariableAssignment(int depth, VariableAssignment assignment) {
@@ -105,15 +93,6 @@ public class Evaluator implements Transform {
             // Variable not defined, add it to the current scope
             variableValues.get(depth).put(variableName, literal);
         }
-
-//        // Check if the variable is already defined in the current scope
-//        if (variableValues.get(depth).containsKey(variableName)) {
-//            // Variable already defined, update its type
-//            variableValues.get(depth).put(variableName, literal);
-//        } else {
-//            // Variable not defined, add it to the current scope
-//            variableValues.get(depth).put(variableName, literal);
-//        }
     }
 
     private int getVariableScope(String variableName) {
@@ -219,6 +198,7 @@ public class Evaluator implements Transform {
                     evaluateIfStatement(parent, (IfClause) child);
                 } else if (child instanceof VariableAssignment) {
                     evaluateVariableAssignment(scope, (VariableAssignment) child);
+                    parent.addChild(child);
                 } else {
                     parent.addChild(child);
                 }

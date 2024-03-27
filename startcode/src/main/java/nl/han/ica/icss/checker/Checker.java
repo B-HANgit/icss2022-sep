@@ -28,11 +28,9 @@ public class Checker {
         if (node instanceof VariableAssignment) {
             checkVariableAssignment(scope, (VariableAssignment) node);
             childWalkTree(node);
-
 //            printVariables(scope);
         }
         else if (node instanceof IfClause) {
-            //TODO check first then scope or reverse?
             checkIfStatement((IfClause) node);
             createNewScope();
             childWalkTree(node);
@@ -58,7 +56,6 @@ public class Checker {
     private void checkDeclaration(Declaration node) {
         ExpressionType valueType = getType(node.expression);
         String propertyName = node.property.name.toLowerCase();
-//        System.out.println("Property: " + propertyName + " Value: " + valueType);
         if(valueType == ExpressionType.UNDEFINED){
             node.setError("Value of property " + propertyName + " is undefined");
         }
@@ -107,7 +104,6 @@ public class Checker {
         }
     }
 
-
     private void childWalkTree(ASTNode node){
         for (ASTNode child : node.getChildren()) {
             walkTree(child);
@@ -128,7 +124,6 @@ public class Checker {
             if(expressionType != valueType){
                 assignment.setError("Variable " + variableName + " is already defined with a different type");
             }
-//            System.out.println("Variable " + variableName + " is already defined with type " + expressionType + " in scope " + getVariableScope(variableName));
             //update the value of the variable
             variableTypes.get(depth).put(variableName, valueType);
 
@@ -138,15 +133,6 @@ public class Checker {
             // Variable not defined, add it to the current scope
             variableTypes.get(depth).put(variableName, valueType);
         }
-
-//        // Check if the variable is already defined in the current scope
-//        if (variableTypes.get(depth).containsKey(variableName)) {
-//            // Variable already defined, update its type
-//            variableTypes.get(depth).put(variableName, valueType);
-//        } else {
-//            // Variable not defined, add it to the current scope
-//            variableTypes.get(depth).put(variableName, valueType);
-//        }
     }
 
     private void checkIfStatement(IfClause node) {
@@ -181,7 +167,6 @@ public class Checker {
         } else if(expression instanceof Operation){
             ExpressionType expressionType = getOperationType((Operation) expression);
             if(expressionType == ExpressionType.UNDEFINED){
-                //TODO fix error message
                 expression.setError("Opperation " + expression + " is not defined");
             }
             return expressionType;
