@@ -31,8 +31,8 @@ public class Checker {
 //            printVariables(scope);
         }
         else if (node instanceof IfClause) {
-            checkIfStatement((IfClause) node);
             createNewScope();
+            checkIfStatement((IfClause) node);
             childWalkTree(node);
             deleteScope();
         } else if (node instanceof Stylerule) {

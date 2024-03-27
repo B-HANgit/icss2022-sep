@@ -30,12 +30,11 @@ public class Evaluator implements Transform {
         if (node instanceof VariableAssignment) {
             evaluateVariableAssignment(scope, (VariableAssignment) node);
             childWalkTree(node);
-
-            printVariables(scope);
+//            printVariables(scope);
         }
         else if (node instanceof IfClause) {
-            evaluateIfStatement(parent, (IfClause) node);
             createNewScope();
+            evaluateIfStatement(parent, (IfClause) node);
             childWalkTree(node);
             deleteScope();
         } else if (node instanceof Stylerule) {
